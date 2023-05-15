@@ -9,15 +9,25 @@ namespace Core
     {
         [SerializeField] private Window[] windows;
         [SerializeField] private Window displayedWindow;
+
+        private DatabaseProvider databaseProvider;
         
         private void Awake()
         {
+            databaseProvider = new DatabaseProvider();
+            databaseProvider.Connecting();
+            
             foreach (var window in windows)
             {
                 window.Hide();
             }
 
             displayedWindow.Show();
+        }
+
+        private void OnApplicationQuit()
+        {
+            databaseProvider?.Disconnect();
         }
     }
 }

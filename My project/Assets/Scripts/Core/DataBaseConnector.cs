@@ -38,6 +38,12 @@ namespace Core
             }
         }
 
+        public void CloseDataBase()
+        {
+            sqliteConnection?.Close();
+            sqliteConnection = null;
+        }
+        
         private void CreateDataBase()
         {
             ExecuteNonQuery(

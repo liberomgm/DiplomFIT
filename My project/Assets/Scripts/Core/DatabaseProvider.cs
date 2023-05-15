@@ -19,5 +19,11 @@ namespace Core
                 Debug.LogError($"Подключение к базе данных статистики не завершено.");
             }
         }
+        
+        public void Disconnect()
+        {
+            dataBaseConnector?.CloseDataBase();
+            dataBaseConnector = null;
+        }
     }
 }
