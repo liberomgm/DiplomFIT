@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Core;
 using UnityEngine;
 
 namespace UI
@@ -7,6 +8,7 @@ namespace UI
     public abstract class Window : MonoBehaviour
     {
         private static List<Window> windows = new List<Window>();
+        protected DatabaseProvider DatabaseProvider;
         
         public void Show()
         {
@@ -36,5 +38,10 @@ namespace UI
 
         protected abstract void OnShow();
         protected abstract void OnHide();
+
+        public void Initialize(DatabaseProvider databaseProvider)
+        {
+            DatabaseProvider = databaseProvider;
+        }
     }
 }

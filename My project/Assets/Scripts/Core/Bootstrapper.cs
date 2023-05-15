@@ -16,9 +16,10 @@ namespace Core
         {
             databaseProvider = new DatabaseProvider();
             databaseProvider.Connecting();
-            
+
             foreach (var window in windows)
             {
+                window.Initialize(databaseProvider);
                 window.Hide();
             }
 

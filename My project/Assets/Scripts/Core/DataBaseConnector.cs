@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using DataBase;
 using Mono.Data.Sqlite;
 using UnityEngine;
 
@@ -8,6 +11,8 @@ namespace Core
 {
     public class DataBaseConnector
     {
+        private const string DBUsers = "db_users";
+        
         private SqliteConnection sqliteConnection;
 
         public bool Connection(string dataBaseFileName)
@@ -42,6 +47,50 @@ namespace Core
         {
             sqliteConnection?.Close();
             sqliteConnection = null;
+        }
+        
+        public bool LoginUserDB(string name, string pass, out User user)
+        {
+            var selectUser = new SelectConstructor();
+            user = null;
+
+            var selectParameters = new QueryParametersCollection
+            {
+                {
+                    "@firstName", name, DbType.String
+                },
+                {
+                    "@password", pass, DbType.String
+                }
+            };
+
+            selectUser.From(DBUsers).Columns("id, firstName, lastName, fatherName, password, phoneNumber, birthday").Where("firstName=@firstName AND password=@password");
+
+            var row = FetchOneRow(selectUser.SelectCommand, selectParameters);
+
+            if (row is { Count: 5 })
+            {
+                try
+                {
+                    user = new User
+                    {
+                        FirstName = (string)row["FirstName"],
+                        LastName = (string)row["LastName"],
+                        FatherName = (string)row["FatherName"],
+                        Id = (long)row["Id"],
+                        Password = (string)row["Password"],
+                        PhoneNumber = (float)row["PhoneNumber"],
+                        Birthday = (string)row["Birthday"]
+                    };
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError(ex);
+                }
+            }
+            return false;
         }
         
         private void CreateDataBase()
@@ -79,6 +128,47 @@ namespace Core
                 "[firstName] VARCHAR(255)  UNIQUE NOT NULL);");
         }
 
+        private Dictionary<string, object> FetchOneRow(string query, IEnumerable parameters)
+        {
+            var rowItem = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                SqliteDataReader reader;
+                using (var command = sqliteConnection.CreateCommand())
+                {
+                    command.CommandText = query;
+                    foreach (QueryParameter paremeter in parameters)
+                    {
+                        command.Parameters.Add(
+                                paremeter.ColumnName.StartsWith("@")
+                                    ? paremeter.ColumnName
+                                    : "@" + paremeter.ColumnName,
+                                paremeter.DbType).Value =
+                            Convert.IsDBNull(paremeter.Value) ? Convert.DBNull : paremeter.Value;
+                    }
+
+                    reader = command.ExecuteReader();
+                }
+
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        rowItem.Add(reader.GetName(i), reader[i]);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex);
+                return null;
+            }
+
+            return rowItem;
+        }
+
+        
         private int ExecuteNonQuery(string query)
         {
             var result = 0;

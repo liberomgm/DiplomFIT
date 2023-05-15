@@ -25,5 +25,10 @@ namespace Core
             dataBaseConnector?.CloseDataBase();
             dataBaseConnector = null;
         }
+        
+        public bool TryLogin(string name, string password, out User user)
+        {
+            return dataBaseConnector.LoginUserDB(name, password, out user);
+        }
     }
 }
