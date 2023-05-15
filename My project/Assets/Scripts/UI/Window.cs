@@ -1,11 +1,16 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace UI
 {
     public abstract class Window : MonoBehaviour
     {
+        private static List<Window> windows = new List<Window>();
+        
         public void Show()
         {
+            ShowAllWindows();
             gameObject.SetActive(true);
             OnShow();
         }
@@ -14,6 +19,19 @@ namespace UI
         {
             gameObject.SetActive(false);
             OnHide();
+        }
+
+        private void ShowAllWindows()
+        {
+            foreach (var window in windows)
+            {
+                window.Hide();
+            }
+        }
+        
+        private void Awake()
+        {
+            windows.Add(this);
         }
 
         protected abstract void OnShow();
