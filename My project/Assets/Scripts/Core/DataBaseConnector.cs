@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Text;
 using DataBase;
 using Mono.Data.Sqlite;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace Core
     public class DataBaseConnector
     {
         private const string DBUsers = "db_users";
-        
+
         private SqliteConnection sqliteConnection;
 
         public bool Connection(string dataBaseFileName)
@@ -48,8 +49,70 @@ namespace Core
             sqliteConnection?.Close();
             sqliteConnection = null;
         }
-        
-        public bool LoginUserDB(string name, string pass, out User user)
+
+        public bool CreateUserDB(
+            string firstName,
+            string lastName,
+            string fatherName,
+            DateTime birthday,
+            string login,
+            string password,
+            string phoneNumber)
+        {
+            if (sqliteConnection != null)
+            {
+                var selectUser = new SelectConstructor();
+                var selectParameters = new QueryParametersCollection
+                {
+                    {
+                        "@login", login, DbType.String
+                    },
+                    {
+                        "@password", password, DbType.String
+                    }
+                };
+
+                var i = (long)ExecuteScalar(
+                    selectUser.Columns("count(*)").From(DBUsers).Where("login=@login AND password=@password")
+                        .SelectCommand, selectParameters);
+
+                if (i == 0)
+                {
+                    var insertParameters = new QueryParametersCollection
+                    {
+                        {
+                            "login", login, DbType.String
+                        },
+                        {
+                            "password", password, DbType.String
+                        },
+                        {
+                            "firstName", firstName, DbType.String
+                        },
+                        {
+                            "lastName", lastName, DbType.String
+                        },
+                        {
+                            "fatherName", fatherName, DbType.String
+                        },
+                        {
+                            "birthday", birthday, DbType.Date
+                        },
+                        {
+                            "phoneNumber", phoneNumber, DbType.String
+                        }
+                    };
+
+                    var result = Insert(DBUsers, insertParameters);
+                    return result > 0;
+                }
+            }
+
+            return false;
+        }
+
+
+        public bool LoginUserDB(string login, string password, out User user)
         {
             var selectUser = new SelectConstructor();
             user = null;
@@ -57,18 +120,20 @@ namespace Core
             var selectParameters = new QueryParametersCollection
             {
                 {
-                    "@firstName", name, DbType.String
+                    "@login", login, DbType.String
                 },
                 {
-                    "@password", pass, DbType.String
+                    "@password", password, DbType.String
                 }
             };
 
-            selectUser.From(DBUsers).Columns("id, firstName, lastName, fatherName, password, phoneNumber, birthday").Where("firstName=@firstName AND password=@password");
+            selectUser.From(DBUsers)
+                .Columns("id, firstName, lastName, fatherName, login, password, phoneNumber, birthday")
+                .Where("login=@login AND password=@password");
 
             var row = FetchOneRow(selectUser.SelectCommand, selectParameters);
 
-            if (row is { Count: 5 })
+            if (row is { Count: 8 })
             {
                 try
                 {
@@ -78,9 +143,10 @@ namespace Core
                         LastName = (string)row["LastName"],
                         FatherName = (string)row["FatherName"],
                         Id = (long)row["Id"],
+                        Login = (string)row["Login"],
                         Password = (string)row["Password"],
-                        PhoneNumber = (float)row["PhoneNumber"],
-                        Birthday = (string)row["Birthday"]
+                        PhoneNumber = (string)row["PhoneNumber"],
+                        Birthday = (DateTime)row["Birthday"]
                     };
 
                     return true;
@@ -90,7 +156,62 @@ namespace Core
                     Debug.LogError(ex);
                 }
             }
+
             return false;
+        }
+
+        private long Insert(string tableName, IEnumerable parameters)
+        {
+            if (string.IsNullOrEmpty(tableName))
+            {
+                return 0;
+            }
+
+            long lastId;
+
+            try
+            {
+                using (var command = sqliteConnection.CreateCommand())
+                {
+                    var ifFirst = true;
+                    var queryColumns = new StringBuilder("(");
+                    var queryValues = new StringBuilder("(");
+                    foreach (QueryParameter parameter in parameters)
+                    {
+                        command.Parameters.Add("@" + parameter.ColumnName, parameter.DbType).Value =
+                            Convert.IsDBNull(parameter.Value) ? Convert.DBNull : parameter.Value;
+
+                        if (ifFirst)
+                        {
+                            queryColumns.Append(parameter.ColumnName);
+                            queryValues.Append("@" + parameter.ColumnName);
+                            ifFirst = false;
+                        }
+                        else
+                        {
+                            queryColumns.Append("," + parameter.ColumnName);
+                            queryValues.Append(",@" + parameter.ColumnName);
+                        }
+                    }
+
+                    queryColumns.Append(")");
+                    queryValues.Append(")");
+
+                    var sql = $"INSERT INTO {tableName} {queryColumns} VALUES {queryValues}";
+
+                    command.CommandText = sql;
+                    command.ExecuteNonQuery();
+                }
+
+                lastId = long.Parse(ExecuteScalar("SELECT last_insert_rowid()", null).ToString());
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex);
+                return 0;
+            }
+
+            return lastId;
         }
         
         private void CreateDataBase()
@@ -101,10 +222,11 @@ namespace Core
                 "[firstName] VARCHAR(255)  UNIQUE NOT NULL, " +
                 "[lastName] VARCHAR(255)  UNIQUE NOT NULL, " +
                 "[fatherName] VARCHAR(255)  UNIQUE NOT NULL, " +
+                "[login] VARCHAR(255)  UNIQUE NOT NULL, " +
                 "[password] VARCHAR(255)  NOT NULL, " +
                 "[phoneNumber] VARCHAR(255)  UNIQUE NOT NULL, " +
-                "[birthday] VARCHAR(255)  NOT NULL);");
-            
+                "[birthday] DATETIME NOT NULL);");
+
             ExecuteNonQuery(
                 "CREATE TABLE IF NOT EXISTS [db_workouts] ( " +
                 "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL , " +
@@ -113,7 +235,7 @@ namespace Core
                 "[workoutDate] DATETIME NOT NULL, " +
                 "[workoutTime] DATETIME NOT NULL, " +
                 "[cost] REAL NOT NULL);");
-            
+
             ExecuteNonQuery(
                 "CREATE TABLE IF NOT EXISTS [db_coachs] ( " +
                 "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL, " +
@@ -122,10 +244,46 @@ namespace Core
                 "[fatherName] VARCHAR(255)  UNIQUE NOT NULL, " +
                 "[sum] VARCHAR(255) NOT NULL, " +
                 "[sportId] INTEGER  NOT NULL REFERENCES db_sports (id) ON DELETE CASCADE ON UPDATE CASCADE);");
-            
+
             ExecuteNonQuery(
                 "CREATE TABLE IF NOT EXISTS [db_sports] ( " +
                 "[firstName] VARCHAR(255)  UNIQUE NOT NULL);");
+        }
+
+        private object ExecuteScalar(string query, IEnumerable parameters)
+        {
+            object result = null;
+            if (sqliteConnection is { State: ConnectionState.Open })
+            {
+                try
+                {
+                    using var sqliteCommand = sqliteConnection.CreateCommand();
+
+                    sqliteCommand.CommandText = query;
+
+                    if (parameters != null)
+                    {
+                        foreach (QueryParameter parameter in parameters)
+                        {
+                            sqliteCommand.Parameters.Add(
+                                parameter.ColumnName.StartsWith("@")
+                                    ? parameter.ColumnName
+                                    : "@" + parameter.ColumnName,
+                                parameter.DbType).Value = Convert.IsDBNull(parameter.Value)
+                                ? Convert.DBNull
+                                : parameter.Value;
+                        }
+                    }
+
+                    result = sqliteCommand.ExecuteScalar();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError(ex);
+                }
+            }
+
+            return result;
         }
 
         private Dictionary<string, object> FetchOneRow(string query, IEnumerable parameters)
@@ -168,7 +326,7 @@ namespace Core
             return rowItem;
         }
 
-        
+
         private int ExecuteNonQuery(string query)
         {
             var result = 0;

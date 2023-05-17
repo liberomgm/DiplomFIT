@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Core
@@ -29,6 +30,11 @@ namespace Core
         public bool TryLogin(string name, string password, out User user)
         {
             return dataBaseConnector.LoginUserDB(name, password, out user);
+        }
+        
+        public bool CreateUser(string name,string lastName,string fatherName, DateTime birthday, string login, string password, string phoneNumber)
+        {                          
+            return dataBaseConnector.CreateUserDB(name, lastName, fatherName, birthday, login, password, phoneNumber);
         }
     }
 }

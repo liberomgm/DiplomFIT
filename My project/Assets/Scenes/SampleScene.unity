@@ -727,6 +727,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2427309840241459357, guid: 50b72ced2f96e404086b584d35c7ac1f, type: 3}
+      propertyPath: mainMenuWindow
+      value: 
+      objectReference: {fileID: 1384906459}
+    - target: {fileID: 2427309840241459357, guid: 50b72ced2f96e404086b584d35c7ac1f, type: 3}
+      propertyPath: startMenuWindows
+      value: 
+      objectReference: {fileID: 1142597965}
     - target: {fileID: 4759354251823903005, guid: 50b72ced2f96e404086b584d35c7ac1f, type: 3}
       propertyPath: m_RootOrder
       value: 4
@@ -830,6 +838,10 @@ PrefabInstance:
     - target: {fileID: 4805280089468394573, guid: 50b72ced2f96e404086b584d35c7ac1f, type: 3}
       propertyPath: m_Name
       value: Autorization
+      objectReference: {fileID: 0}
+    - target: {fileID: 4805280089468394573, guid: 50b72ced2f96e404086b584d35c7ac1f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4805280090479339159, guid: 50b72ced2f96e404086b584d35c7ac1f, type: 3}
       propertyPath: m_RootOrder
@@ -1058,6 +1070,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7195404540886051168, guid: 2b04cc88d817a054bad6a151ae495a13, type: 3}
+      propertyPath: startMenuWindows
+      value: 
+      objectReference: {fileID: 1142597965}
+    - target: {fileID: 7195404540886051168, guid: 2b04cc88d817a054bad6a151ae495a13, type: 3}
+      propertyPath: authorizationWindow
+      value: 
+      objectReference: {fileID: 87149286}
     - target: {fileID: 7265377012817194854, guid: 2b04cc88d817a054bad6a151ae495a13, type: 3}
       propertyPath: m_Name
       value: Registration
