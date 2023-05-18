@@ -13,6 +13,8 @@ namespace Core
     public class DataBaseConnector
     {
         private const string DBUsers = "db_users";
+        private const string DBCoach = "db_coachs";
+        private const string DBSport = "db_sports";
 
         private SqliteConnection sqliteConnection;
 
@@ -48,6 +50,67 @@ namespace Core
         {
             sqliteConnection?.Close();
             sqliteConnection = null;
+        }
+
+        public bool CreateUserDB(
+            string firstName,
+            string lastName,
+            string fatherName,
+            int sportId,
+            string login,
+            string password,
+            string sum)
+        {
+            if (sqliteConnection != null)
+            {
+                var selectUser = new SelectConstructor();
+                var selectParameters = new QueryParametersCollection
+                {
+                    {
+                        "@login", login, DbType.String
+                    },
+                    {
+                        "@password", password, DbType.String
+                    }
+                };
+
+                var i = (long)ExecuteScalar(
+                    selectUser.Columns("count(*)").From(DBUsers).Where("login=@login AND password=@password")
+                        .SelectCommand, selectParameters);
+
+                if (i == 0)
+                {
+                    var insertParameters = new QueryParametersCollection
+                    {
+                        {
+                            "login", login, DbType.String
+                        },
+                        {
+                            "password", password, DbType.String
+                        },
+                        {
+                            "firstName", firstName, DbType.String
+                        },
+                        {
+                            "lastName", lastName, DbType.String
+                        },
+                        {
+                            "fatherName", fatherName, DbType.String
+                        },
+                        {
+                            "sum", sum, DbType.String
+                        },
+                        {
+                            "sportId", sportId, DbType.String
+                        }
+                    };
+
+                    var result = Insert(DBCoach, insertParameters);
+                    return result > 0;
+                }
+            }
+
+            return false;
         }
 
         public bool CreateUserDB(
@@ -160,6 +223,97 @@ namespace Core
             return false;
         }
 
+        public IEnumerable<Sport> GetAllSport()
+        {
+            var sports = new List<Sport>();
+            var selectName = new SelectConstructor();
+
+            var selectParameters = new QueryParametersCollection();
+            selectName.From(DBSport).Columns("id, title");
+            var data = ExecuteSql(selectName, selectParameters);
+
+            foreach (DataRow row in data.Rows)
+            {
+                sports.Add(new Sport()
+                {
+                    Id = (long)row["id"],
+                    Title = (string)row["title"]
+                   
+                });
+            }
+
+            return sports;
+        }
+
+        public bool AddSport(string title)
+        {
+            if (sqliteConnection != null)
+            {
+                var selectUser = new SelectConstructor();
+                var selectParameters = new QueryParametersCollection
+                {
+                    {
+                        "@title", title, DbType.String
+                    }
+                };
+
+                var i = (long)ExecuteScalar(
+                    selectUser.Columns("count(*)").From(DBSport).Where("title=@title")
+                        .SelectCommand, selectParameters);
+
+                if (i == 0)
+                {
+                    var insertParameters = new QueryParametersCollection
+                    {
+                        {
+                            "title", title, DbType.String
+                        }
+                    };
+
+                    var result = Insert(DBSport, insertParameters);
+                    return result > 0;
+                }
+            }
+
+            return false;
+        }
+
+        private DataTable ExecuteSql(SelectConstructor select, IEnumerable parameters)
+        {
+            var result = new DataTable();
+            if (sqliteConnection is { State: ConnectionState.Open })
+            {
+                try
+                {
+                    using var sqliteCommand = sqliteConnection.CreateCommand();
+
+                    sqliteCommand.CommandText = @select.SelectCommand;
+                    if (parameters != null)
+                    {
+                        foreach (QueryParameter parameter in parameters)
+                        {
+                            sqliteCommand.Parameters.Add(
+                                parameter.ColumnName.StartsWith("@")
+                                    ? parameter.ColumnName
+                                    : "@" + parameter.ColumnName,
+                                parameter.DbType).Value = Convert.IsDBNull(parameter.Value)
+                                ? Convert.DBNull
+                                : parameter.Value;
+                        }
+                    }
+
+                    using var sqliteDataReader = sqliteCommand.ExecuteReader();
+                    result.Load(sqliteDataReader);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError(ex);
+                }
+            }
+
+            return result;
+        }
+
         private long Insert(string tableName, IEnumerable parameters)
         {
             if (string.IsNullOrEmpty(tableName))
@@ -213,7 +367,7 @@ namespace Core
 
             return lastId;
         }
-        
+
         private void CreateDataBase()
         {
             ExecuteNonQuery(
@@ -242,12 +396,15 @@ namespace Core
                 "[firstName] VARCHAR(255)  UNIQUE NOT NULL, " +
                 "[lastName] VARCHAR(255)  UNIQUE NOT NULL, " +
                 "[fatherName] VARCHAR(255)  UNIQUE NOT NULL, " +
+                "[login] VARCHAR(255)  UNIQUE NOT NULL, " +
+                "[password] VARCHAR(255)  NOT NULL, " +
                 "[sum] VARCHAR(255) NOT NULL, " +
                 "[sportId] INTEGER  NOT NULL REFERENCES db_sports (id) ON DELETE CASCADE ON UPDATE CASCADE);");
 
             ExecuteNonQuery(
                 "CREATE TABLE IF NOT EXISTS [db_sports] ( " +
-                "[firstName] VARCHAR(255)  UNIQUE NOT NULL);");
+                "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "[title] VARCHAR(255)  UNIQUE NOT NULL);");
         }
 
         private object ExecuteScalar(string query, IEnumerable parameters)

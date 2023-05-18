@@ -23,6 +23,10 @@ namespace Core
                 window.Hide();
             }
 
+            databaseProvider.AddSport("Волебол");
+            databaseProvider.AddSport("Футбол");
+            databaseProvider.AddSport("Баскетбол");
+            
             displayedWindow.Show();
         }
 

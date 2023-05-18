@@ -10,25 +10,36 @@ namespace UI.Windows
         
         [SerializeField]
         private Button authorizationButton;
+        
+        [SerializeField]
+        private Button authorizationCoachButton;
 
-        [SerializeField] private RegistrationWindow registrationWindow;
+        [SerializeField] private RegistrationUserWindow registrationUserWindow;
+        [SerializeField] private RegistrationCoachWindow registrationCoachWindow;
         [SerializeField] private AuthorizationWindow authorizationWindow;
         
         protected override void OnShow()
         {
             registrationButton.onClick.AddListener(ShowRegistrationWindow);
             authorizationButton.onClick.AddListener(ShowAuthorizationWindow);
+            authorizationCoachButton.onClick.AddListener(ShowAuthorizationCoachWindow);
         }
 
         protected override void OnHide()
         {
             registrationButton.onClick.RemoveListener(ShowRegistrationWindow);
             authorizationButton.onClick.RemoveListener(ShowAuthorizationWindow);
+            authorizationCoachButton.onClick.RemoveListener(ShowAuthorizationCoachWindow);
+        }
+
+        private void ShowAuthorizationCoachWindow()
+        {
+            registrationCoachWindow.Show();
         }
 
         private void ShowRegistrationWindow()
         {
-            registrationWindow.Show();
+            registrationUserWindow.Show();
         }
 
         private void ShowAuthorizationWindow()

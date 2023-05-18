@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace UI.Windows
 {
-    public class RegistrationWindow : Window
+    public class RegistrationUserWindow : Window
     {
         [SerializeField] private StartMenuWindows startMenuWindows;
         [SerializeField] private AuthorizationWindow authorizationWindow;

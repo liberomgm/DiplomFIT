@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core
@@ -35,6 +36,21 @@ namespace Core
         public bool CreateUser(string name,string lastName,string fatherName, DateTime birthday, string login, string password, string phoneNumber)
         {                          
             return dataBaseConnector.CreateUserDB(name, lastName, fatherName, birthday, login, password, phoneNumber);
+        }
+
+        public bool CreateCoach(string name,string lastName,string fatherName, int sportId, string login, string password, string sum)
+        {
+            return dataBaseConnector.CreateUserDB(name, lastName, fatherName, sportId, login, password, sum);
+        }
+
+        public IEnumerable<Sport> WriteAllSports()
+        {
+            return dataBaseConnector.GetAllSport();
+        }
+
+        public void AddSport(string title)
+        {
+            dataBaseConnector.AddSport(title);
         }
     }
 }
