@@ -11,9 +11,9 @@ namespace UI.Calendar
         [SerializeField] private TMP_Text monthTitle;
         [SerializeField] private RectTransform dayContent;
 
-        [SerializeField] private GameObject dayPrefabs;
+        [SerializeField] private DayView dayPrefabs;
 
-        [SerializeField] private List<GameObject> days = new List<GameObject>();
+        private List<DayView> days = new List<DayView>();
 
         public void FillingOut(int monthNumber)
         {
@@ -22,7 +22,9 @@ namespace UI.Calendar
 
             for (int i = 0; i < daysCount; i++)
             {
-                days.Add(Instantiate(dayPrefabs, dayContent));
+                var day = Instantiate(dayPrefabs, dayContent);
+                day.SetDate(i + 1);
+                days.Add(day);
             }
         }
 
