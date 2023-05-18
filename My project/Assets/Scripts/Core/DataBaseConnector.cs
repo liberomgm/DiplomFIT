@@ -222,7 +222,7 @@ namespace Core
 
             return false;
         }
-        
+
         public bool LoginCoachDB(string login, string password, out Coach coach)
         {
             var selectUser = new SelectConstructor();
@@ -271,6 +271,33 @@ namespace Core
             return false;
         }
 
+        public IEnumerable<Coach> GetCoach()
+        {
+            var coach = new List<Coach>();
+            var selectName = new SelectConstructor();
+
+            var selectParameters = new QueryParametersCollection();
+            selectName.From(DBCoach).Columns("id, firstName, lastName, fatherName, login, password, sum, sportId");
+            var data = ExecuteSql(selectName, selectParameters);
+
+            foreach (DataRow row in data.Rows)
+            {
+                coach.Add(new Coach()
+                {
+                    FirstName = (string)row["FirstName"],
+                    LastName = (string)row["LastName"],
+                    FatherName = (string)row["FatherName"],
+                    Id = (long)row["Id"],
+                    Login = (string)row["Login"],
+                    Password = (string)row["Password"],
+                    Sum = (string)row["Sum"],
+                    SportId = (long)row["SportId"]
+                });
+            }
+
+            return coach;
+        }
+
         public IEnumerable<Sport> GetAllSport()
         {
             var sports = new List<Sport>();
@@ -286,7 +313,6 @@ namespace Core
                 {
                     Id = (long)row["id"],
                     Title = (string)row["title"]
-                   
                 });
             }
 

@@ -1327,7 +1327,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3003885794011539848}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.81333333
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2962,7 +2962,7 @@ GameObject:
   - component: {fileID: 1777951056032959177}
   - component: {fileID: 5245168570145176463}
   m_Layer: 5
-  m_Name: Hour (1)
+  m_Name: Minut
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4727,6 +4727,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79e64e194d614ed6aa9c58d87ca0c81f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dateText: {fileID: 235334209169935014}
+  hourTextField: {fileID: 4246699467561451640}
+  minutesTextField: {fileID: 2231890914475945592}
+  coachDropDown: {fileID: 8020026185774707471}
 --- !u!1 &7713998931728366581
 GameObject:
   m_ObjectHideFlags: 0

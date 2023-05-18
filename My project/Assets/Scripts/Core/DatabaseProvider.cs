@@ -57,5 +57,10 @@ namespace Core
         {
             dataBaseConnector.AddSport(title);
         }
+
+        public IEnumerable<Coach> GetCoach()
+        {
+            return dataBaseConnector.GetCoach();
+        }
     }
 }

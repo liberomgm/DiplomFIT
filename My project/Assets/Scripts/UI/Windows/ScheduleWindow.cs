@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UI.Calendar;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,7 +30,15 @@ namespace UI.Windows
 
         private void ShowCreateEntryPanel()
         {
-            createEntryPanel.Show(DateTime.Now.Year, DateTime.Now.Month, selectDay);
+            var coachName = new List<string>();
+            var coaches = DatabaseProvider.GetCoach();
+
+            foreach (var coach in coaches)
+            {
+                coachName.Add( $"{coach.LastName} {coach.FirstName[0]}. {coach.FatherName}.");
+            }
+            
+            createEntryPanel.Show(DateTime.Now.Year, DateTime.Now.Month, selectDay, coachName);
         }
 
         protected override void OnHide()
