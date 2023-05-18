@@ -2248,13 +2248,29 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2806706183179307583, guid: d63386109df719d43898a44e91a36189, type: 3}
+      propertyPath: newsWindow
+      value: 
+      objectReference: {fileID: 841212738}
+    - target: {fileID: 2806706183179307583, guid: d63386109df719d43898a44e91a36189, type: 3}
+      propertyPath: userWindow
+      value: 
+      objectReference: {fileID: 1730244114}
+    - target: {fileID: 2806706183179307583, guid: d63386109df719d43898a44e91a36189, type: 3}
+      propertyPath: scheduleWindow
+      value: 
+      objectReference: {fileID: 2134398590}
+    - target: {fileID: 2806706183179307583, guid: d63386109df719d43898a44e91a36189, type: 3}
+      propertyPath: startMenuWindows
+      value: 
+      objectReference: {fileID: 1142597965}
     - target: {fileID: 6907576986472898724, guid: d63386109df719d43898a44e91a36189, type: 3}
       propertyPath: m_Name
       value: MainMenu
       objectReference: {fileID: 0}
     - target: {fileID: 6907576986472898724, guid: d63386109df719d43898a44e91a36189, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6907576986472898728, guid: d63386109df719d43898a44e91a36189, type: 3}
       propertyPath: m_Pivot.x
