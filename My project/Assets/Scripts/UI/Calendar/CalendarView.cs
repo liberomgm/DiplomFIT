@@ -15,7 +15,7 @@ namespace UI.Calendar
 
         private List<DayView> days = new List<DayView>();
 
-        public void FillingOut(int monthNumber)
+        public void FillingOut(int monthNumber, Action<int> onDaySelected)
         {
             monthTitle.text = MonthName(monthNumber);
             var daysCount = DateTime.DaysInMonth(DateTime.Now.Year, monthNumber);
@@ -23,7 +23,7 @@ namespace UI.Calendar
             for (int i = 0; i < daysCount; i++)
             {
                 var day = Instantiate(dayPrefabs, dayContent);
-                day.SetDate(i + 1);
+                day.SetDate(i + 1, onDaySelected);
                 days.Add(day);
             }
         }
