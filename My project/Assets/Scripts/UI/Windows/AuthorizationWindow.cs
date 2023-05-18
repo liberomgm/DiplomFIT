@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -54,7 +55,11 @@ namespace UI.Windows
 
         private void LoginAttempt()
         {
-            if (DatabaseProvider.TryLogin(login, password, out var user))
+            if (DatabaseProvider.TryLogin(login, password, out User user))
+            {
+                mainMenuWindow.Show();
+            }
+            else if (DatabaseProvider.TryLogin(login, password, out Coach coach))
             {
                 mainMenuWindow.Show();
             }

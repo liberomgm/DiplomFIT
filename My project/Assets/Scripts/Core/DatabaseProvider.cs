@@ -33,6 +33,11 @@ namespace Core
             return dataBaseConnector.LoginUserDB(name, password, out user);
         }
         
+        public bool TryLogin(string name, string password, out Coach user)
+        {
+            return dataBaseConnector.LoginCoachDB(name, password, out user);
+        }
+        
         public bool CreateUser(string name,string lastName,string fatherName, DateTime birthday, string login, string password, string phoneNumber)
         {                          
             return dataBaseConnector.CreateUserDB(name, lastName, fatherName, birthday, login, password, phoneNumber);

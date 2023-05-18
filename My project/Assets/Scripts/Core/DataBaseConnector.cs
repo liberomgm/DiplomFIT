@@ -222,6 +222,54 @@ namespace Core
 
             return false;
         }
+        
+        public bool LoginCoachDB(string login, string password, out Coach coach)
+        {
+            var selectUser = new SelectConstructor();
+            coach = null;
+
+            var selectParameters = new QueryParametersCollection
+            {
+                {
+                    "@login", login, DbType.String
+                },
+                {
+                    "@password", password, DbType.String
+                }
+            };
+
+            selectUser.From(DBCoach)
+                .Columns("id, firstName, lastName, fatherName, login, password, sum, sportId")
+                .Where("login=@login AND password=@password");
+
+            var row = FetchOneRow(selectUser.SelectCommand, selectParameters);
+
+            if (row is { Count: 8 })
+            {
+                try
+                {
+                    coach = new Coach()
+                    {
+                        FirstName = (string)row["FirstName"],
+                        LastName = (string)row["LastName"],
+                        FatherName = (string)row["FatherName"],
+                        Id = (long)row["Id"],
+                        Login = (string)row["Login"],
+                        Password = (string)row["Password"],
+                        Sum = (string)row["Sum"],
+                        SportId = (long)row["SportId"]
+                    };
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError(ex);
+                }
+            }
+
+            return false;
+        }
 
         public IEnumerable<Sport> GetAllSport()
         {
