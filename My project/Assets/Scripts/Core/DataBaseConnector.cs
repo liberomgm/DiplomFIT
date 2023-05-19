@@ -398,58 +398,31 @@ namespace Core
             return false;
         }
 
-        public bool AddWorkoutRecord(long userId, long coachId, DateTime dateTime, int cost)
+        public bool AddWorkoutRecord(int userId, int coachId, DateTime dateTime, int cost)
         {
             if (sqliteConnection != null)
             {
-                var selectUser = new SelectConstructor();
-                var selectParameters = new QueryParametersCollection
+                var insertParameters = new QueryParametersCollection
                 {
                     {
-                        "@u_id", (int)userId, DbType.Int32
+                        "user", userId.ToString(), DbType.String
                     },
                     {
-                        "@c_id", (int)coachId, DbType.Int32
+                        "coach", coachId.ToString(), DbType.String
                     },
                     {
-                        "@workoutDate", dateTime, DbType.Date
+                        "workoutDate", dateTime, DbType.Date
                     },
                     {
-                        "@workoutTime", dateTime, DbType.Date
+                        "workoutTime", dateTime, DbType.Date
                     },
                     {
-                        "@cost", cost, DbType.String
+                        "cost", cost, DbType.String
                     }
                 };
 
-                var i = (long)ExecuteScalar(
-                    selectUser.Columns("count(*)").From(DBWorkouts)
-                        .SelectCommand, selectParameters);
-
-                if (i == 0)
-                {
-                    var insertParameters = new QueryParametersCollection
-                    {
-                        {
-                            "@u_id", (int)userId, DbType.Int32
-                        },
-                        {
-                            "@c_id", (int)coachId, DbType.Int32
-                        },
-                        {
-                            "@workoutDate", dateTime, DbType.Date
-                        },
-                        {
-                            "@workoutTime", dateTime, DbType.Date
-                        },
-                        {
-                            "@cost", cost, DbType.String
-                        }
-                    };
-
-                    var result = Insert(DBWorkouts, insertParameters);
-                    return result > 0;
-                }
+                var result = Insert(DBWorkouts, insertParameters);
+                return result > 0;
             }
 
             return false;
@@ -561,8 +534,8 @@ namespace Core
             ExecuteNonQuery(
                 "CREATE TABLE IF NOT EXISTS [db_workouts] ( " +
                 "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL , " +
-                "[u_id] INTEGER  NOT NULL REFERENCES db_users (id) ON DELETE CASCADE ON UPDATE CASCADE, " +
-                "[c_id] INTEGER  NOT NULL REFERENCES db_coachs (id) ON DELETE CASCADE ON UPDATE CASCADE, " +
+                "[user] VARCHAR(255) UNIQUE NOT NULL, " +
+                "[coach] VARCHAR(255) UNIQUE NOT NULL, " +
                 "[workoutDate] DATETIME NOT NULL, " +
                 "[workoutTime] DATETIME NOT NULL, " +
                 "[cost] VARCHAR(255) NOT NULL);");
