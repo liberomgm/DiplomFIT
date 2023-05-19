@@ -270,8 +270,53 @@ namespace Core
 
             return false;
         }
+        
+        public bool LoginCoachDB(long id, out Coach coach)
+        {
+            var selectUser = new SelectConstructor();
+            coach = null;
 
-        public IEnumerable<Coach> GetCoach()
+            var selectParameters = new QueryParametersCollection
+            {
+                {
+                    "@id", id, DbType.Int64
+                }
+            };
+
+            selectUser.From(DBCoach)
+                .Columns("id, firstName, lastName, fatherName, login, password, sum, sportId")
+                .Where("id=@id");
+
+            var row = FetchOneRow(selectUser.SelectCommand, selectParameters);
+
+            if (row is { Count: 8 })
+            {
+                try
+                {
+                    coach = new Coach()
+                    {
+                        FirstName = (string)row["FirstName"],
+                        LastName = (string)row["LastName"],
+                        FatherName = (string)row["FatherName"],
+                        Id = (long)row["Id"],
+                        Login = (string)row["Login"],
+                        Password = (string)row["Password"],
+                        Sum = (string)row["Sum"],
+                        SportId = (long)row["SportId"]
+                    };
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError(ex);
+                }
+            }
+
+            return false;
+        }
+
+        public IEnumerable<Coach> GetCoaches()
         {
             var coach = new List<Coach>();
             var selectName = new SelectConstructor();

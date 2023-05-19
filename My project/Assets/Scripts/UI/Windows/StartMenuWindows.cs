@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DefaultNamespace;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI.Windows
@@ -23,6 +24,9 @@ namespace UI.Windows
             registrationButton.onClick.AddListener(ShowRegistrationWindow);
             authorizationButton.onClick.AddListener(ShowAuthorizationWindow);
             authorizationCoachButton.onClick.AddListener(ShowAuthorizationCoachWindow);
+
+            UserStorage.CurrentCoach = null;
+            UserStorage.CurrentUser = null;
         }
 
         protected override void OnHide()

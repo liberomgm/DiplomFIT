@@ -58,9 +58,19 @@ namespace Core
             dataBaseConnector.AddSport(title);
         }
 
-        public IEnumerable<Coach> GetCoach()
+        public IEnumerable<Coach> GetCoaches()
         {
-            return dataBaseConnector.GetCoach();
+            return dataBaseConnector.GetCoaches();
+        }
+
+        public bool GetCoach(long coachId, out Coach coach)
+        {
+            return dataBaseConnector.LoginCoachDB(coachId, out coach);
+        }
+
+        public void AddWorkoutRecord(long userId, long coachId, DateTime dateTime, string coachSum)
+        {
+            
         }
     }
 }

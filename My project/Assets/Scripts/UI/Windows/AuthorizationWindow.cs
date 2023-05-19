@@ -1,4 +1,5 @@
 ﻿using Core;
+using DefaultNamespace;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -57,10 +58,12 @@ namespace UI.Windows
         {
             if (DatabaseProvider.TryLogin(login, password, out User user))
             {
+                UserStorage.CurrentUser = user;
                 mainMenuWindow.Show();
             }
             else if (DatabaseProvider.TryLogin(login, password, out Coach coach))
             {
+                UserStorage.CurrentCoach = coach;
                 mainMenuWindow.Show();
             }
             else
