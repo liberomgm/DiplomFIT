@@ -15,6 +15,7 @@ namespace Core
         private const string DBUsers = "db_users";
         private const string DBCoach = "db_coachs";
         private const string DBSport = "db_sports";
+        private const string DBWorkouts = "db_workouts";
 
         private SqliteConnection sqliteConnection;
 
@@ -270,7 +271,7 @@ namespace Core
 
             return false;
         }
-        
+
         public bool LoginCoachDB(long id, out Coach coach)
         {
             var selectUser = new SelectConstructor();
@@ -397,6 +398,63 @@ namespace Core
             return false;
         }
 
+        public bool AddWorkoutRecord(long userId, long coachId, DateTime dateTime, int cost)
+        {
+            if (sqliteConnection != null)
+            {
+                var selectUser = new SelectConstructor();
+                var selectParameters = new QueryParametersCollection
+                {
+                    {
+                        "@u_id", (int)userId, DbType.Int32
+                    },
+                    {
+                        "@c_id", (int)coachId, DbType.Int32
+                    },
+                    {
+                        "@workoutDate", dateTime, DbType.Date
+                    },
+                    {
+                        "@workoutTime", dateTime, DbType.Date
+                    },
+                    {
+                        "@cost", cost, DbType.String
+                    }
+                };
+
+                var i = (long)ExecuteScalar(
+                    selectUser.Columns("count(*)").From(DBWorkouts)
+                        .SelectCommand, selectParameters);
+
+                if (i == 0)
+                {
+                    var insertParameters = new QueryParametersCollection
+                    {
+                        {
+                            "@u_id", (int)userId, DbType.Int32
+                        },
+                        {
+                            "@c_id", (int)coachId, DbType.Int32
+                        },
+                        {
+                            "@workoutDate", dateTime, DbType.Date
+                        },
+                        {
+                            "@workoutTime", dateTime, DbType.Date
+                        },
+                        {
+                            "@cost", cost, DbType.String
+                        }
+                    };
+
+                    var result = Insert(DBWorkouts, insertParameters);
+                    return result > 0;
+                }
+            }
+
+            return false;
+        }
+
         private DataTable ExecuteSql(SelectConstructor select, IEnumerable parameters)
         {
             var result = new DataTable();
@@ -507,7 +565,7 @@ namespace Core
                 "[c_id] INTEGER  NOT NULL REFERENCES db_coachs (id) ON DELETE CASCADE ON UPDATE CASCADE, " +
                 "[workoutDate] DATETIME NOT NULL, " +
                 "[workoutTime] DATETIME NOT NULL, " +
-                "[cost] REAL NOT NULL);");
+                "[cost] VARCHAR(255) NOT NULL);");
 
             ExecuteNonQuery(
                 "CREATE TABLE IF NOT EXISTS [db_coachs] ( " +

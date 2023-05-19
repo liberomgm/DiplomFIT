@@ -70,7 +70,7 @@ namespace Core
 
         public void AddWorkoutRecord(long userId, long coachId, DateTime dateTime, string coachSum)
         {
-            
+            dataBaseConnector.AddWorkoutRecord(userId, coachId, dateTime, int.Parse(coachSum));
         }
     }
 }
