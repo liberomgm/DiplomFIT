@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Text;
+using Assets.Scripts.Core;
 using DataBase;
 using Mono.Data.Sqlite;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Core
@@ -17,13 +19,23 @@ namespace Core
         private const string DBSport = "db_sports";
         private const string DBWorkouts = "db_workouts";
 
+        private string PathAndroid = "jar:file://" + Application.dataPath + "!/assets/DiplomFIT.bytes";
+
         private SqliteConnection sqliteConnection;
 
         public bool Connection(string dataBaseFileName)
         {
             try
             {
-                var connection = Path.Combine("URI=file:", dataBaseFileName);
+                var connection = Path.Combine(Application.persistentDataPath, dataBaseFileName);
+
+                if (!File.Exists(connection)) 
+                    UnpackDatabase(connection, dataBaseFileName);
+
+
+
+
+                connection = "URI=file:" + connection;
 
                 sqliteConnection?.Close();
                 sqliteConnection = new SqliteConnection(connection);
@@ -45,6 +57,14 @@ namespace Core
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        private void UnpackDatabase(string toPath, string fileName)
+        {
+            WWW reader = new WWW(PathAndroid);
+            while (!reader.isDone) { }
+
+            File.WriteAllBytes(toPath, reader.bytes);
         }
 
         public void CloseDataBase()
@@ -428,6 +448,115 @@ namespace Core
             return false;
         }
 
+        public IEnumerable<WorkoutRecord> GetWorkoutRecords()
+        {
+            var sports = new List<WorkoutRecord>();
+            var selectName = new SelectConstructor();
+
+            var selectParameters = new QueryParametersCollection();
+            selectName.From(DBWorkouts).Columns("id, user, coach, workoutDate, workoutTime, cost");
+            var data = ExecuteSql(selectName, selectParameters);
+
+            foreach (DataRow row in data.Rows)
+            {
+                sports.Add(new WorkoutRecord()
+                {
+                    Id = (long)row["id"],
+                    User = (int)row["user"],
+                    Coach = (int)row["coach"],
+                    WorkoutDate = (DateTime)row["workoutDate"],
+                    WorkoutTime = (DateTime)row["workoutTime"],
+                    Cost = (string)row["cost"]
+                });
+            }
+
+            return sports;
+        }
+
+        public User GetUser(int id)
+        {
+            var selectUser = new SelectConstructor();
+
+            var selectParameters = new QueryParametersCollection
+            {
+                {
+                    "@id", id, DbType.String
+                }
+            };
+
+            selectUser.From(DBUsers)
+                .Columns("id, firstName, lastName, fatherName, login, password, phoneNumber, birthday")
+                .Where("id=@id");
+
+            var row = FetchOneRow(selectUser.SelectCommand, selectParameters);
+
+            if (row is { Count: 8 })
+            {
+                try
+                {
+                    return new User
+                    {
+                        FirstName = (string)row["FirstName"],
+                        LastName = (string)row["LastName"],
+                        FatherName = (string)row["FatherName"],
+                        Id = (long)row["Id"],
+                        Login = (string)row["Login"],
+                        Password = (string)row["Password"],
+                        PhoneNumber = (string)row["PhoneNumber"],
+                        Birthday = (DateTime)row["Birthday"]
+                    };
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError(ex);
+                }
+            }
+
+            return null;
+        }
+
+        public Coach GetCoach(int id)
+        {
+            var selectUser = new SelectConstructor();
+
+            var selectParameters = new QueryParametersCollection
+            {
+                {
+                    "@id", id, DbType.Int64
+                }
+            };
+
+            selectUser.From(DBCoach)
+                .Columns("id, firstName, lastName, fatherName, login, password, sum, sportId")
+                .Where("id=@id");
+
+            var row = FetchOneRow(selectUser.SelectCommand, selectParameters);
+
+            if (row is { Count: 8 })
+            {
+                try
+                {
+                    return new Coach()
+                    {
+                        FirstName = (string)row["FirstName"],
+                        LastName = (string)row["LastName"],
+                        FatherName = (string)row["FatherName"],
+                        Id = (long)row["Id"],
+                        Login = (string)row["Login"],
+                        Password = (string)row["Password"],
+                        Sum = (string)row["Sum"],
+                        SportId = (long)row["SportId"]
+                    };
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError(ex);
+                }
+            }
+
+            return null;
+        }
+
         private DataTable ExecuteSql(SelectConstructor select, IEnumerable parameters)
         {
             var result = new DataTable();
@@ -511,7 +640,7 @@ namespace Core
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex);
+                Debug.LogError(ex); 
                 return 0;
             }
 
@@ -534,8 +663,8 @@ namespace Core
             ExecuteNonQuery(
                 "CREATE TABLE IF NOT EXISTS [db_workouts] ( " +
                 "[id] INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL , " +
-                "[user] VARCHAR(255) UNIQUE NOT NULL, " +
-                "[coach] VARCHAR(255) UNIQUE NOT NULL, " +
+                "[user] INTEGER NOT NULL, " +
+                "[coach] INTEGER NOT NULL, " +
                 "[workoutDate] DATETIME NOT NULL, " +
                 "[workoutTime] DATETIME NOT NULL, " +
                 "[cost] VARCHAR(255) NOT NULL);");
@@ -546,7 +675,7 @@ namespace Core
                 "[firstName] VARCHAR(255)  UNIQUE NOT NULL, " +
                 "[lastName] VARCHAR(255)  UNIQUE NOT NULL, " +
                 "[fatherName] VARCHAR(255)  UNIQUE NOT NULL, " +
-                "[login] VARCHAR(255)  UNIQUE NOT NULL, " +
+                "[login] VARCHAR(255)  NOT NULL, " +
                 "[password] VARCHAR(255)  NOT NULL, " +
                 "[sum] VARCHAR(255) NOT NULL, " +
                 "[sportId] INTEGER  NOT NULL REFERENCES db_sports (id) ON DELETE CASCADE ON UPDATE CASCADE);");
@@ -654,5 +783,7 @@ namespace Core
 
             return result;
         }
+
+        
     }
 }

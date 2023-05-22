@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Assets.Scripts.UI.Calendar;
 using DefaultNamespace;
 using UI.Calendar;
 using UnityEngine;
@@ -12,6 +14,7 @@ namespace UI.Windows
         [SerializeField] private CalendarView calendarView;
         [SerializeField] private Button createEntryButton;
         [SerializeField] private CreateEntryPanel createEntryPanel;
+        [SerializeField] private ListWorkoutRecords listWorkoutRecords;
         private int selectDay;
 
         protected override void OnShow()
@@ -27,6 +30,16 @@ namespace UI.Windows
             createEntryButton.gameObject.SetActive(true);
             
             createEntryButton.onClick.AddListener(ShowCreateEntryPanel);
+
+            var workoutRecord = DatabaseProvider.GetWorkoutRecords(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+
+            if(workoutRecord.Count() > 0 )
+            {
+                foreach (var workout in workoutRecord)
+                {
+                    listWorkoutRecords.AddRecord(workout, DatabaseProvider);
+                }
+            }
         }
 
         private void ShowCreateEntryPanel()

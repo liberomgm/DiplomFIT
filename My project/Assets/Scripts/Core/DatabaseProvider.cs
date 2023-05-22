@@ -1,3 +1,4 @@
+using Assets.Scripts.Core;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,7 +8,7 @@ namespace Core
     public class DatabaseProvider : MonoBehaviour
     {
         private DataBaseConnector dataBaseConnector;
-        private const string DataBaseFileName = "DiplomFIT.db";
+        private const string DataBaseFileName = "DiplomFIT.bytes";
         
         public void Connecting()
         {
@@ -37,7 +38,17 @@ namespace Core
         {
             return dataBaseConnector.LoginCoachDB(name, password, out user);
         }
-        
+
+        public User GetUser(int id)
+        {
+            return dataBaseConnector.GetUser(id);
+        }
+
+        public Coach GetCoach(int id)
+        {
+            return dataBaseConnector.GetCoach(id);
+        }
+
         public bool CreateUser(string name,string lastName,string fatherName, DateTime birthday, string login, string password, string phoneNumber)
         {                          
             return dataBaseConnector.CreateUserDB(name, lastName, fatherName, birthday, login, password, phoneNumber);
@@ -71,6 +82,22 @@ namespace Core
         public void AddWorkoutRecord(long userId, long coachId, DateTime dateTime, string coachSum)
         {
             dataBaseConnector.AddWorkoutRecord((int)userId, (int)coachId, dateTime, int.Parse(coachSum));
+        }
+
+        public IEnumerable<WorkoutRecord> GetWorkoutRecords(int year, int month, int day)
+        {
+            IEnumerable<WorkoutRecord> workoutRecords = dataBaseConnector.GetWorkoutRecords();
+
+
+            var result = new List<WorkoutRecord>();
+
+            foreach (WorkoutRecord record in workoutRecords)
+            {
+                if(record.WorkoutTime.Month == month && record.WorkoutTime.Day == day)
+                    result.Add(record);
+            }
+
+            return result;
         }
     }
 }
