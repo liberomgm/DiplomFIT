@@ -56,7 +56,7 @@ namespace UI.Calendar
         {
             databaseProvider.GetCoach(coachId + 1, out var coach);
 
-            databaseProvider.AddWorkoutRecord(userId, coachId, new DateTime(year, month, day, hour, minutes, 0),
+            databaseProvider.AddWorkoutRecord(userId, coachId + 1, new DateTime(year, month, day, hour, minutes, 0),
                 coach.Sum);
         }
 

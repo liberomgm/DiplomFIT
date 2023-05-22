@@ -39,12 +39,12 @@ namespace Core
             return dataBaseConnector.LoginCoachDB(name, password, out user);
         }
 
-        public User GetUser(int id)
+        public User GetUser(long id)
         {
             return dataBaseConnector.GetUser(id);
         }
 
-        public Coach GetCoach(int id)
+        public Coach GetCoach(long id)
         {
             return dataBaseConnector.GetCoach(id);
         }

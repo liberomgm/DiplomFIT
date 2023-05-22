@@ -29,7 +29,7 @@ namespace Assets.Scripts.UI.Calendar
         {
             foreach (var item in workoutViews)
             {
-                Destroy(item);
+                Destroy(item.gameObject);
             }
 
             workoutViews.Clear();

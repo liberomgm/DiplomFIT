@@ -20,6 +20,7 @@ namespace Core
         private const string DBWorkouts = "db_workouts";
 
         private string PathAndroid = "jar:file://" + Application.dataPath + "!/assets/DiplomFIT.bytes";
+        private string PathWindow = Application.dataPath + "/DiplomFIT.bytes";
 
         private SqliteConnection sqliteConnection;
 
@@ -27,15 +28,15 @@ namespace Core
         {
             try
             {
-                var connection = Path.Combine(Application.persistentDataPath, dataBaseFileName);
+                var connection = Path.Combine(Application.streamingAssetsPath, dataBaseFileName);
 
-                if (!File.Exists(connection)) 
-                    UnpackDatabase(connection, dataBaseFileName);
-
-
-
+                if (!File.Exists(connection))
+                {
+                    //UnpackDatabase(connection, dataBaseFileName);
+                }
 
                 connection = "URI=file:" + connection;
+
 
                 sqliteConnection?.Close();
                 sqliteConnection = new SqliteConnection(connection);
@@ -425,10 +426,10 @@ namespace Core
                 var insertParameters = new QueryParametersCollection
                 {
                     {
-                        "user", userId.ToString(), DbType.String
+                        "user", userId.ToString(), DbType.Int64
                     },
                     {
-                        "coach", coachId.ToString(), DbType.String
+                        "coach", coachId.ToString(), DbType.Int64
                     },
                     {
                         "workoutDate", dateTime, DbType.Date
@@ -457,23 +458,25 @@ namespace Core
             selectName.From(DBWorkouts).Columns("id, user, coach, workoutDate, workoutTime, cost");
             var data = ExecuteSql(selectName, selectParameters);
 
-            foreach (DataRow row in data.Rows)
-            {
-                sports.Add(new WorkoutRecord()
+
+                foreach (DataRow row in data.Rows)
                 {
-                    Id = (long)row["id"],
-                    User = (int)row["user"],
-                    Coach = (int)row["coach"],
-                    WorkoutDate = (DateTime)row["workoutDate"],
-                    WorkoutTime = (DateTime)row["workoutTime"],
-                    Cost = (string)row["cost"]
-                });
-            }
+                    sports.Add(new WorkoutRecord()
+                    {
+                        Id = (long)row["id"],
+                        User = (long)row["user"],
+                        Coach = (long)row["coach"],
+                        WorkoutDate = (DateTime)row["workoutDate"],
+                        WorkoutTime = (DateTime)row["workoutTime"],
+                        Cost = (string)row["cost"]
+                    });
+                }
+            
 
             return sports;
         }
 
-        public User GetUser(int id)
+        public User GetUser(long id)
         {
             var selectUser = new SelectConstructor();
 
@@ -515,7 +518,7 @@ namespace Core
             return null;
         }
 
-        public Coach GetCoach(int id)
+        public Coach GetCoach(long id)
         {
             var selectUser = new SelectConstructor();
 
