@@ -28,11 +28,11 @@ namespace Core
         {
             try
             {
-                var connection = Path.Combine(Application.streamingAssetsPath, dataBaseFileName);
+                var connection = Path.Combine(Application.persistentDataPath, dataBaseFileName);;
 
                 if (!File.Exists(connection))
                 {
-                    //UnpackDatabase(connection, dataBaseFileName);
+                    UnpackDatabase(connection, dataBaseFileName);
                 }
 
                 connection = "URI=file:" + connection;

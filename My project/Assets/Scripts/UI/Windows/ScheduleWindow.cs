@@ -35,6 +35,7 @@ namespace UI.Windows
             selectDay = day;
 
             listWorkoutRecords.Clear();
+            createEntryPanel.Hide();
 
             var workoutRecord = DatabaseProvider.GetWorkoutRecords(DateTime.Now.Year, DateTime.Now.Month, day);
 
